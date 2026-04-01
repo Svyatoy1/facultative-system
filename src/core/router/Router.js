@@ -1,3 +1,5 @@
+const BodyParser = require('../http/BodyParser');
+
 class Router {
   constructor() {
     this.routes = [];
@@ -50,6 +52,8 @@ class Router {
 
       req.params = params;
       req.query = Object.fromEntries(url.searchParams.entries());
+
+      await BodyParser.parse(req);
 
       await matchedRoute.handler(req, res);
     } catch (error) {

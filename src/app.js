@@ -26,8 +26,14 @@ router.get('/login', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end('POST /login works');
+  const { login, password } = req.body;
+
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(`
+    <h1>Form parsed successfully</h1>
+    <p>Login: ${login || ''}</p>
+    <p>Password received: ${password ? 'Yes' : 'No'}</p>
+  `);
 });
 
 router.get('/courses/:id', async (req, res) => {
