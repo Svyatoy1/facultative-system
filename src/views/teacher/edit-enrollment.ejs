@@ -1,43 +1,56 @@
 <%- include('../partials/header', { title, user }) %>
 
 <div class="top-actions">
-  <a href="/teacher/courses">← Back to my courses</a>
+  <a href="/teacher/courses/<%= enrollment.course_id %>/students">← Back to students</a>
 </div>
 
 <section class="card">
-  <h1>Students for: <%= course.title %></h1>
-  <p class="muted">Manage student progress for this course.</p>
+  <h1>Edit Result</h1>
+  <p><strong>Course:</strong> <%= enrollment.course_title %></p>
+  <p><strong>Student:</strong> <%= enrollment.student_name %></p>
+  <p class="muted"><strong>Login:</strong> <%= enrollment.student_login %></p>
 </section>
 
 <section class="card">
-  <% if (!students.length) { %>
-    <p>No students enrolled in this course yet.</p>
-  <% } else { %>
-    <table>
-      <thead>
-        <tr>
-          <th>Student</th>
-          <th>Login</th>
-          <th>Status</th>
-          <th>Grade</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% students.forEach((student) => { %>
-          <tr>
-            <td><%= student.student_name %></td>
-            <td><%= student.student_login %></td>
-            <td><%= student.status %></td>
-            <td><%= student.grade ?? '—' %></td>
-            <td>
-              <a href="/teacher/enrollments/<%= student.id %>/edit">Edit result</a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+  <% if (errorMessage) { %>
+    <div class="error"><%= errorMessage %></div>
   <% } %>
+
+  <form method="POST" action="/teacher/enrollments/<%= enrollment.id %>/update">
+    <div class="field">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="enrolled" <%= enrollment.status === 'enrolled' ? 'selected' : '' %>>
+          enrolled
+        </option>
+        <option value="in_progress" <%= enrollment.status === 'in_progress' ? 'selected' : '' %>>
+          in_progress
+        </option>
+        <option value="completed" <%= enrollment.status === 'completed' ? 'selected' : '' %>>
+          completed
+        </option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="grade">Grade (0-100)</label>
+      <input
+        id="grade"
+        type="number"
+        name="grade"
+        min="0"
+        max="100"
+        value="<%= enrollment.grade ?? '' %>"
+      />
+    </div>
+
+    <div class="field">
+      <label for="review">Review</label>
+      <textarea id="review" name="review" rows="6"><%= enrollment.review ?? '' %></textarea>
+    </div>
+
+    <button type="submit">Save</button>
+  </form>
 </section>
 
 <%- include('../partials/footer') %>

@@ -5,35 +5,24 @@
 </div>
 
 <section class="card">
-  <h1>My Courses</h1>
-  <p class="muted">Courses where the current student is enrolled.</p>
+  <h1>Teacher Courses</h1>
+  <p class="muted">Courses assigned to the current teacher.</p>
 </section>
 
-<% if (!enrollments.length) { %>
+<% if (!courses.length) { %>
   <section class="card">
-    <p>You are not enrolled in any courses yet.</p>
+    <p>No courses assigned to you yet.</p>
   </section>
 <% } %>
 
 <section class="grid">
-  <% enrollments.forEach((item) => { %>
+  <% courses.forEach((course) => { %>
     <article class="card">
-      <h3><%= item.title %></h3>
-      <p><%= item.description || 'No description' %></p>
-      <p><strong>Teacher:</strong> <%= item.teacher_name %></p>
-
-      <div
-        class="badge <%= item.status === 'completed'
-          ? 'badge--completed'
-          : item.status === 'in_progress'
-          ? 'badge--progress'
-          : 'badge--enrolled' %>"
-      >
-        Status: <%= item.status %>
-      </div>
-
-      <p style="margin-top: 12px;"><strong>Grade:</strong> <%= item.grade ?? 'Not assigned yet' %></p>
-      <p><strong>Review:</strong> <%= item.review || 'No review yet' %></p>
+      <h3><%= course.title %></h3>
+      <p><%= course.description || 'No description' %></p>
+      <a class="button" href="/teacher/courses/<%= course.id %>/students">
+        View students
+      </a>
     </article>
   <% }) %>
 </section>
