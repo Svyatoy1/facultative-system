@@ -1,3 +1,5 @@
+const AuthService = require('../../src/services/AuthService');
+
 describe('AuthService', () => {
   let userDao;
   let authService;
