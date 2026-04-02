@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/teacher/courses">← Back to my courses</a>
+</div>
+
+<section class="card">
+  <h1>Students for: <%= course.title %></h1>
+  <p class="muted">Manage student progress for this course.</p>
+</section>
+
+<section class="card">
+  <% if (!students.length) { %>
+    <p>No students enrolled in this course yet.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Login</th>
+          <th>Status</th>
+          <th>Grade</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% students.forEach((student) => { %>
+          <tr>
+            <td><%= student.student_name %></td>
+            <td><%= student.student_login %></td>
+            <td><%= student.status %></td>
+            <td><%= student.grade ?? '—' %></td>
+            <td>
+              <a href="/teacher/enrollments/<%= student.id %>/edit">Edit result</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

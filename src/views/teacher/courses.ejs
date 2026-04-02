@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/dashboard">← Back to dashboard</a>
+</div>
+
+<section class="card">
+  <h1>My Courses</h1>
+  <p class="muted">Courses where the current student is enrolled.</p>
+</section>
+
+<% if (!enrollments.length) { %>
+  <section class="card">
+    <p>You are not enrolled in any courses yet.</p>
+  </section>
+<% } %>
+
+<section class="grid">
+  <% enrollments.forEach((item) => { %>
+    <article class="card">
+      <h3><%= item.title %></h3>
+      <p><%= item.description || 'No description' %></p>
+      <p><strong>Teacher:</strong> <%= item.teacher_name %></p>
+
+      <div
+        class="badge <%= item.status === 'completed'
+          ? 'badge--completed'
+          : item.status === 'in_progress'
+          ? 'badge--progress'
+          : 'badge--enrolled' %>"
+      >
+        Status: <%= item.status %>
+      </div>
+
+      <p style="margin-top: 12px;"><strong>Grade:</strong> <%= item.grade ?? 'Not assigned yet' %></p>
+      <p><strong>Review:</strong> <%= item.review || 'No review yet' %></p>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,9 +1,10 @@
 const CookieHelper = require('../core/session/CookieHelper');
 
 class AuthController {
-  constructor(authService, sessionManager) {
+  constructor(authService, sessionManager, viewRenderer) {
     this.authService = authService;
     this.sessionManager = sessionManager;
+    this.viewRenderer = viewRenderer;
   }
 
   async showLogin(req, res) {
@@ -13,7 +14,7 @@ class AuthController {
       return;
     }
 
-    this.renderLoginForm(res);
+    await this.renderLoginForm(res);
   }
 
   async login(req, res) {
@@ -22,7 +23,12 @@ class AuthController {
     const result = await this.authService.login(login, password);
 
     if (!result.ok) {
-      this.renderLoginForm(res, result.message, result.status);
+      await this.renderLoginForm(
+        res,
+        result.message,
+        result.status,
+        { login }
+      );
       return;
     }
 
@@ -52,27 +58,23 @@ class AuthController {
     res.end();
   }
 
-  renderLoginForm(res, errorMessage = '', statusCode = 200) {
-    res.writeHead(statusCode, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(`
-      <h1>Login page</h1>
-
-      ${errorMessage ? `<p style="color:red;">${errorMessage}</p>` : ''}
-
-      <form method="POST" action="/login">
-        <div style="margin-bottom: 10px;">
-          <label for="login">Login:</label><br />
-          <input id="login" type="text" name="login" />
-        </div>
-
-        <div style="margin-bottom: 10px;">
-          <label for="password">Password:</label><br />
-          <input id="password" type="password" name="password" />
-        </div>
-
-        <button type="submit">Sign in</button>
-      </form>
-    `);
+  async renderLoginForm(
+    res,
+    errorMessage = '',
+    statusCode = 200,
+    formValues = {}
+  ) {
+    await this.viewRenderer.render(
+      res,
+      'auth/login',
+      {
+        title: 'Login',
+        user: null,
+        errorMessage,
+        formValues
+      },
+      statusCode
+    );
   }
 }
 

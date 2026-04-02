@@ -1,5 +1,6 @@
 const Router = require('./core/router/Router');
 const SessionManager = require('./core/session/SessionManager');
+const ViewRenderer = require('./core/view/ViewRenderer');
 
 const UserDao = require('./dao/UserDao');
 const CourseDao = require('./dao/CourseDao');
@@ -15,6 +16,7 @@ const TeacherController = require('./controllers/TeacherController');
 
 const router = new Router();
 const sessionManager = new SessionManager();
+const viewRenderer = new ViewRenderer();
 
 const userDao = new UserDao();
 const courseDao = new CourseDao();
@@ -24,9 +26,13 @@ const authService = new AuthService(userDao);
 const courseService = new CourseService(courseDao, enrollmentDao);
 const teacherService = new TeacherService(courseDao, enrollmentDao);
 
-const authController = new AuthController(authService, sessionManager);
-const courseController = new CourseController(courseService);
-const teacherController = new TeacherController(teacherService);
+const authController = new AuthController(
+  authService,
+  sessionManager,
+  viewRenderer
+);
+const courseController = new CourseController(courseService, viewRenderer);
+const teacherController = new TeacherController(teacherService, viewRenderer);
 
 function requireAuth(req, res) {
   if (!req.user) {
@@ -38,18 +44,26 @@ function requireAuth(req, res) {
   return true;
 }
 
-function requireRole(req, res, allowedRoles) {
+async function requireRole(req, res, allowedRoles) {
   if (!requireAuth(req, res)) {
     return false;
   }
 
   if (!allowedRoles.includes(req.user.role)) {
-    res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(`
-      <h1>403 Forbidden</h1>
-      <p>You do not have access to this page.</p>
-      <p><a href="/dashboard">Back to dashboard</a></p>
-    `);
+    await viewRenderer.render(
+      res,
+      'error',
+      {
+        title: '403 Forbidden',
+        user: req.user,
+        heading: '403 Forbidden',
+        message: 'You do not have access to this page.',
+        backHref: '/dashboard',
+        backLabel: 'Back to dashboard'
+      },
+      403
+    );
+
     return false;
   }
 
@@ -76,42 +90,14 @@ router.get('/dashboard', async (req, res) => {
     return;
   }
 
-  let roleLinks = '';
-
-  if (req.user.role === 'student') {
-    roleLinks = `
-      <li><a href="/courses">All courses</a></li>
-      <li><a href="/my-courses">My courses</a></li>
-    `;
-  } else if (req.user.role === 'teacher') {
-    roleLinks = `
-      <li><a href="/teacher/courses">My teaching courses</a></li>
-    `;
-  } else {
-    roleLinks = `
-      <li>Admin panel will be added later.</li>
-    `;
-  }
-
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-  res.end(`
-    <h1>Dashboard</h1>
-    <p>Welcome, ${req.user.full_name}!</p>
-    <p>Login: ${req.user.login}</p>
-    <p>Role: ${req.user.role}</p>
-
-    <ul>
-      ${roleLinks}
-    </ul>
-
-    <form method="POST" action="/logout" style="margin-top: 20px;">
-      <button type="submit">Logout</button>
-    </form>
-  `);
+  await viewRenderer.render(res, 'dashboard', {
+    title: 'Dashboard',
+    user: req.user
+  });
 });
 
 router.get('/courses', async (req, res) => {
-  if (!requireRole(req, res, ['student'])) {
+  if (!(await requireRole(req, res, ['student']))) {
     return;
   }
 
@@ -119,7 +105,7 @@ router.get('/courses', async (req, res) => {
 });
 
 router.post('/courses/:id/enroll', async (req, res) => {
-  if (!requireRole(req, res, ['student'])) {
+  if (!(await requireRole(req, res, ['student']))) {
     return;
   }
 
@@ -127,7 +113,7 @@ router.post('/courses/:id/enroll', async (req, res) => {
 });
 
 router.get('/my-courses', async (req, res) => {
-  if (!requireRole(req, res, ['student'])) {
+  if (!(await requireRole(req, res, ['student']))) {
     return;
   }
 
@@ -135,7 +121,7 @@ router.get('/my-courses', async (req, res) => {
 });
 
 router.get('/teacher/courses', async (req, res) => {
-  if (!requireRole(req, res, ['teacher'])) {
+  if (!(await requireRole(req, res, ['teacher']))) {
     return;
   }
 
@@ -143,7 +129,7 @@ router.get('/teacher/courses', async (req, res) => {
 });
 
 router.get('/teacher/courses/:id/students', async (req, res) => {
-  if (!requireRole(req, res, ['teacher'])) {
+  if (!(await requireRole(req, res, ['teacher']))) {
     return;
   }
 
@@ -151,7 +137,7 @@ router.get('/teacher/courses/:id/students', async (req, res) => {
 });
 
 router.get('/teacher/enrollments/:id/edit', async (req, res) => {
-  if (!requireRole(req, res, ['teacher'])) {
+  if (!(await requireRole(req, res, ['teacher']))) {
     return;
   }
 
@@ -159,7 +145,7 @@ router.get('/teacher/enrollments/:id/edit', async (req, res) => {
 });
 
 router.post('/teacher/enrollments/:id/update', async (req, res) => {
-  if (!requireRole(req, res, ['teacher'])) {
+  if (!(await requireRole(req, res, ['teacher']))) {
     return;
   }
 
@@ -171,8 +157,14 @@ router.get('/courses/:id', async (req, res) => {
     return;
   }
 
-  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end(`Course id: ${req.params.id}`);
+  await viewRenderer.render(res, 'error', {
+    title: 'Course Page',
+    user: req.user,
+    heading: 'Course page',
+    message: `Temporary route. Course id: ${req.params.id}`,
+    backHref: '/dashboard',
+    backLabel: 'Back to dashboard'
+  });
 });
 
 module.exports = {

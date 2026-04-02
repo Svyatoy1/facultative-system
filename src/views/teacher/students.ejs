@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/dashboard">← Back to dashboard</a>
+</div>
+
+<section class="card">
+  <h1>Teacher Courses</h1>
+  <p class="muted">Courses assigned to the current teacher.</p>
+</section>
+
+<% if (!courses.length) { %>
+  <section class="card">
+    <p>No courses assigned to you yet.</p>
+  </section>
+<% } %>
+
+<section class="grid">
+  <% courses.forEach((course) => { %>
+    <article class="card">
+      <h3><%= course.title %></h3>
+      <p><%= course.description || 'No description' %></p>
+      <a class="button" href="/teacher/courses/<%= course.id %>/students">
+        View students
+      </a>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

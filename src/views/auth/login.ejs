@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title, user }) %>
+
+<section class="card card--narrow">
+  <h1>Login</h1>
+  <p class="muted">Sign in to continue working with the facultative system.</p>
+
+  <% if (errorMessage) { %>
+    <div class="error"><%= errorMessage %></div>
+  <% } %>
+
+  <form method="POST" action="/login">
+    <div class="field">
+      <label for="login">Login</label>
+      <input
+        id="login"
+        type="text"
+        name="login"
+        value="<%= formValues?.login || '' %>"
+      />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+      />
+    </div>
+
+    <button type="submit">Sign in</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

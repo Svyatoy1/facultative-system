@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/dashboard">← Back to dashboard</a>
+</div>
+
+<section class="card">
+  <h1>All Courses</h1>
+  <p class="muted">Available facultatives for the current student.</p>
+</section>
+
+<% if (!courses.length) { %>
+  <section class="card">
+    <p>No courses found.</p>
+  </section>
+<% } %>
+
+<section class="grid grid--courses">
+  <% courses.forEach((course) => { %>
+    <article class="card">
+      <h3><%= course.title %></h3>
+      <p><%= course.description || 'No description' %></p>
+      <p class="muted"><strong>Teacher:</strong> <%= course.teacher_name %></p>
+
+      <% if (course.enrollment_id) { %>
+        <div
+          class="badge <%= course.enrollment_status === 'completed'
+            ? 'badge--completed'
+            : course.enrollment_status === 'in_progress'
+            ? 'badge--progress'
+            : 'badge--enrolled' %>"
+        >
+          Status: <%= course.enrollment_status %>
+        </div>
+        <p class="success">You are already enrolled in this course.</p>
+      <% } else { %>
+        <form method="POST" action="/courses/<%= course.id %>/enroll" style="margin-top: 14px;">
+          <button type="submit">Enroll</button>
+        </form>
+      <% } %>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

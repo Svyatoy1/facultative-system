@@ -1,0 +1,31 @@
+<%- include('./partials/header', { title, user }) %>
+
+<section class="card">
+  <h1>Dashboard</h1>
+  <p>Welcome, <strong><%= user.full_name %></strong>!</p>
+  <p class="muted">Login: <%= user.login %></p>
+  <p class="muted">Role: <%= user.role %></p>
+</section>
+
+<section class="card">
+  <h2>Available actions</h2>
+
+  <% if (user.role === 'student') { %>
+    <ul class="list">
+      <li><a href="/courses">Browse all courses</a></li>
+      <li><a href="/my-courses">View my courses</a></li>
+    </ul>
+  <% } else if (user.role === 'teacher') { %>
+    <ul class="list">
+      <li><a href="/teacher/courses">Open my teaching courses</a></li>
+    </ul>
+  <% } else { %>
+    <p>Admin panel will be added later.</p>
+  <% } %>
+
+  <form method="POST" action="/logout" style="margin-top: 20px;">
+    <button type="submit">Logout</button>
+  </form>
+</section>
+
+<%- include('./partials/footer') %>

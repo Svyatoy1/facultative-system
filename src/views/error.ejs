@@ -1,0 +1,12 @@
+<%- include('./partials/header', { title, user }) %>
+
+<section class="card card--narrow">
+  <h1><%= heading || 'Error' %></h1>
+  <p><%= message %></p>
+
+  <% if (backHref && backLabel) { %>
+    <p><a href="<%= backHref %>"><%= backLabel %></a></p>
+  <% } %>
+</section>
+
+<%- include('./partials/footer') %>
