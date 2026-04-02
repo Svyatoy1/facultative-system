@@ -1,40 +1,25 @@
 const Router = require('./core/router/Router');
+const UserDao = require('./dao/UserDao');
+const AuthService = require('./services/AuthService');
+const AuthController = require('./controllers/AuthController');
 
 const router = new Router();
 
+const userDao = new UserDao();
+const authService = new AuthService(userDao);
+const authController = new AuthController(authService);
+
 router.get('/', async (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end('Facultative System is running');
-});
-
-router.get('/login', async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end(`
-    <h1>Login page</h1>
-    <form method="POST" action="/login">
-      <div>
-        <label>Login:</label>
-        <input type="text" name="login" />
-      </div>
-      <div>
-        <label>Password:</label>
-        <input type="password" name="password" />
-      </div>
-      <button type="submit">Sign in</button>
-    </form>
+    <h1>Facultative System</h1>
+    <p>Application is running.</p>
+    <p><a href="/login">Go to login</a></p>
   `);
 });
 
-router.post('/login', async (req, res) => {
-  const { login, password } = req.body;
-
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-  res.end(`
-    <h1>Form parsed successfully</h1>
-    <p>Login: ${login || ''}</p>
-    <p>Password received: ${password ? 'Yes' : 'No'}</p>
-  `);
-});
+router.get('/login', authController.showLogin.bind(authController));
+router.post('/login', authController.login.bind(authController));
 
 router.get('/courses/:id', async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
