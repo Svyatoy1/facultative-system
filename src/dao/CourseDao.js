@@ -57,6 +57,22 @@ class CourseDao {
     const { rows } = await pool.query(query, [courseId]);
     return rows[0] || null;
   }
+
+  async findByIdAndTeacherId(courseId, teacherId) {
+    const query = `
+      SELECT
+        c.id,
+        c.title,
+        c.description,
+        c.teacher_id
+      FROM courses c
+      WHERE c.id = $1 AND c.teacher_id = $2
+      LIMIT 1
+    `;
+
+    const { rows } = await pool.query(query, [courseId, teacherId]);
+    return rows[0] || null;
+  }
 }
 
 module.exports = CourseDao;

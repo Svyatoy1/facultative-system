@@ -91,6 +91,9 @@ class CourseController {
           <div style="border: 1px solid #ccc; padding: 16px; margin-bottom: 16px; border-radius: 8px;">
             <h3>${course.title}</h3>
             <p>${course.description || 'No description'}</p>
+            <p>
+              <a href="/teacher/courses/${course.id}/students">View students</a>
+            </p>
           </div>
         `;
       })

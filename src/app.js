@@ -7,9 +7,11 @@ const EnrollmentDao = require('./dao/EnrollmentDao');
 
 const AuthService = require('./services/AuthService');
 const CourseService = require('./services/CourseService');
+const TeacherService = require('./services/TeacherService');
 
 const AuthController = require('./controllers/AuthController');
 const CourseController = require('./controllers/CourseController');
+const TeacherController = require('./controllers/TeacherController');
 
 const router = new Router();
 const sessionManager = new SessionManager();
@@ -20,9 +22,11 @@ const enrollmentDao = new EnrollmentDao();
 
 const authService = new AuthService(userDao);
 const courseService = new CourseService(courseDao, enrollmentDao);
+const teacherService = new TeacherService(courseDao, enrollmentDao);
 
 const authController = new AuthController(authService, sessionManager);
 const courseController = new CourseController(courseService);
+const teacherController = new TeacherController(teacherService);
 
 function requireAuth(req, res) {
   if (!req.user) {
@@ -136,6 +140,30 @@ router.get('/teacher/courses', async (req, res) => {
   }
 
   await courseController.showTeacherCourses(req, res);
+});
+
+router.get('/teacher/courses/:id/students', async (req, res) => {
+  if (!requireRole(req, res, ['teacher'])) {
+    return;
+  }
+
+  await teacherController.showCourseStudents(req, res);
+});
+
+router.get('/teacher/enrollments/:id/edit', async (req, res) => {
+  if (!requireRole(req, res, ['teacher'])) {
+    return;
+  }
+
+  await teacherController.showEditEnrollmentForm(req, res);
+});
+
+router.post('/teacher/enrollments/:id/update', async (req, res) => {
+  if (!requireRole(req, res, ['teacher'])) {
+    return;
+  }
+
+  await teacherController.updateEnrollment(req, res);
 });
 
 router.get('/courses/:id', async (req, res) => {
