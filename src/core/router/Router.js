@@ -1,4 +1,5 @@
 const BodyParser = require('../http/BodyParser');
+const logger = require('../../utils/logger');
 
 class Router {
   constructor() {
@@ -31,11 +32,20 @@ class Router {
       const pathname = url.pathname;
       const method = req.method.toUpperCase();
 
+      logger.info('Incoming request', {
+        method,
+        pathname,
+        userId: req.user?.id || null,
+        role: req.user?.role || null
+      });
+
       const matchedRoute = this.routes.find((route) => {
         return route.method === method && route.regex.test(pathname);
       });
 
       if (!matchedRoute) {
+        logger.warn('Route not found', { method, pathname });
+
         res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end('404 Not Found');
         return;
@@ -54,10 +64,12 @@ class Router {
       req.query = Object.fromEntries(url.searchParams.entries());
 
       await BodyParser.parse(req);
-
       await matchedRoute.handler(req, res);
     } catch (error) {
-      console.error('Router error:', error);
+      logger.error('Router error', {
+        error: error.message,
+        stack: error.stack
+      });
 
       res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('500 Internal Server Error');

@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 class TeacherController {
   constructor(teacherService, viewRenderer) {
     this.teacherService = teacherService;
@@ -74,6 +76,12 @@ class TeacherController {
     );
 
     if (!result.ok) {
+      logger.warn('Enrollment update failed', {
+        teacherId: req.user.id,
+        enrollmentId: req.params.id,
+        reason: result.message
+      });
+
       const reload = await this.teacherService.getEnrollmentForEdit(
         req.user.id,
         req.params.id
@@ -109,6 +117,14 @@ class TeacherController {
       );
       return;
     }
+
+    logger.info('Enrollment updated', {
+      teacherId: req.user.id,
+      enrollmentId: req.params.id,
+      courseId: result.enrollment.course_id,
+      status: req.body.status,
+      grade: req.body.grade || null
+    });
 
     res.writeHead(302, {
       Location: `/teacher/courses/${result.enrollment.course_id}/students`

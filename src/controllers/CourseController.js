@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 class CourseController {
   constructor(courseService, viewRenderer) {
     this.courseService = courseService;
@@ -21,6 +23,12 @@ class CourseController {
     );
 
     if (!result.ok) {
+      logger.warn('Enrollment failed', {
+        userId: req.user.id,
+        courseId: req.params.id,
+        reason: result.message
+      });
+
       await this.viewRenderer.render(
         res,
         'error',
@@ -36,6 +44,12 @@ class CourseController {
       );
       return;
     }
+
+    logger.info('Student enrolled in course', {
+      userId: req.user.id,
+      courseId: req.params.id,
+      enrollmentId: result.enrollment.id
+    });
 
     res.writeHead(302, { Location: '/my-courses' });
     res.end();

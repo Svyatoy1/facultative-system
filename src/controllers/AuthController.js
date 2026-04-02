@@ -1,4 +1,5 @@
 const CookieHelper = require('../core/session/CookieHelper');
+const logger = require('../utils/logger');
 
 class AuthController {
   constructor(authService, sessionManager, viewRenderer) {
@@ -23,6 +24,11 @@ class AuthController {
     const result = await this.authService.login(login, password);
 
     if (!result.ok) {
+      logger.warn('Login failed', {
+        login: login || null,
+        reason: result.message
+      });
+
       await this.renderLoginForm(
         res,
         result.message,
@@ -34,6 +40,13 @@ class AuthController {
 
     const { user } = result;
     const sessionId = this.sessionManager.createSession(user);
+
+    logger.info('Login successful', {
+      userId: user.id,
+      login: user.login,
+      role: user.role,
+      sessionId
+    });
 
     CookieHelper.setCookie(res, 'sid', sessionId, {
       httpOnly: true,
@@ -47,6 +60,12 @@ class AuthController {
   }
 
   async logout(req, res) {
+    logger.info('Logout', {
+      userId: req.user?.id || null,
+      login: req.user?.login || null,
+      sessionId: req.sessionId || null
+    });
+
     this.sessionManager.destroySession(req.sessionId);
 
     CookieHelper.clearCookie(res, 'sid', {
