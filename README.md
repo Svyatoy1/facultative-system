@@ -6,11 +6,18 @@ The project was developed as a laboratory work in JavaScript without using high-
 ## Project idea
 
 The system allows:
-- students to view available courses;
+- students to register and sign in;
+- students to browse available courses;
 - students to enroll in courses;
-- teachers to view their own courses;
-- teachers to manage enrolled students;
-- teachers to assign course status, grade, and review.
+- students to view their own courses, statuses, grades, and reviews;
+- teachers to register and sign in;
+- teachers to create their own courses;
+- teachers to view students enrolled in their courses;
+- teachers to update course status, grade, and review for a student;
+- admins to sign in;
+- admins to view all users;
+- admins to create new users;
+- admins to view all courses in the system.
 
 Authentication is implemented with login/password, sessions, and cookies.
 
@@ -55,6 +62,7 @@ facultative-system/
 │   │   ├── db.js
 │   │   └── env.js
 │   ├── controllers/
+│   │   ├── AdminController.js
 │   │   ├── AuthController.js
 │   │   ├── CourseController.js
 │   │   └── TeacherController.js
@@ -73,21 +81,23 @@ facultative-system/
 │   │   ├── EnrollmentDao.js
 │   │   └── UserDao.js
 │   ├── services/
+│   │   ├── AdminService.js
 │   │   ├── AuthService.js
 │   │   ├── CourseService.js
 │   │   └── TeacherService.js
 │   ├── utils/
 │   │   └── logger.js
 │   └── views/
+│       ├── admin/
 │       ├── auth/
 │       ├── student/
 │       ├── teacher/
 │       └── partials/
 ├── tests/
+│   ├── controllers/
+│   ├── core/
+│   ├── dao/
 │   └── services/
-│       ├── AuthService.test.js
-│       ├── CourseService.test.js
-│       └── TeacherService.test.js
 ├── .env
 ├── .env.example
 ├── .gitignore
