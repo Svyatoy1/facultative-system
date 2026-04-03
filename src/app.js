@@ -6,10 +6,12 @@ const UserDao = require('./dao/UserDao');
 const CourseDao = require('./dao/CourseDao');
 const EnrollmentDao = require('./dao/EnrollmentDao');
 
+const AdminService = require('./services/AdminService');
 const AuthService = require('./services/AuthService');
 const CourseService = require('./services/CourseService');
 const TeacherService = require('./services/TeacherService');
 
+const AdminController = require('./controllers/AdminController');
 const AuthController = require('./controllers/AuthController');
 const CourseController = require('./controllers/CourseController');
 const TeacherController = require('./controllers/TeacherController');
@@ -22,10 +24,12 @@ const userDao = new UserDao();
 const courseDao = new CourseDao();
 const enrollmentDao = new EnrollmentDao();
 
+const adminService = new AdminService(userDao, courseDao);
 const authService = new AuthService(userDao);
 const courseService = new CourseService(courseDao, enrollmentDao);
 const teacherService = new TeacherService(courseDao, enrollmentDao);
 
+const adminController = new AdminController(adminService, viewRenderer);
 const authController = new AuthController(
   authService,
   sessionManager,
@@ -168,6 +172,38 @@ router.post('/teacher/enrollments/:id/update', async (req, res) => {
   }
 
   await teacherController.updateEnrollment(req, res);
+});
+
+router.get('/admin/users', async (req, res) => {
+  if (!(await requireRole(req, res, ['admin']))) {
+    return;
+  }
+
+  await adminController.showUsers(req, res);
+});
+
+router.get('/admin/users/create', async (req, res) => {
+  if (!(await requireRole(req, res, ['admin']))) {
+    return;
+  }
+
+  await adminController.showCreateUserForm(req, res);
+});
+
+router.post('/admin/users/create', async (req, res) => {
+  if (!(await requireRole(req, res, ['admin']))) {
+    return;
+  }
+
+  await adminController.createUser(req, res);
+});
+
+router.get('/admin/courses', async (req, res) => {
+  if (!(await requireRole(req, res, ['admin']))) {
+    return;
+  }
+
+  await adminController.showCourses(req, res);
 });
 
 router.get('/courses/:id', async (req, res) => {

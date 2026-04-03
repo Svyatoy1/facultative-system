@@ -20,7 +20,11 @@
       <li><a href="/teacher/courses">Open my teaching courses</a></li>
     </ul>
   <% } else { %>
-    <p>Admin panel will be added later.</p>
+    <ul class="list">
+      <li><a href="/admin/users">View all users</a></li>
+      <li><a href="/admin/users/create">Create user</a></li>
+      <li><a href="/admin/courses">View all courses</a></li>
+    </ul>
   <% } %>
 
   <form method="POST" action="/logout" style="margin-top: 20px;">

@@ -205,6 +205,12 @@
           <% if (user.role === 'teacher') { %>
             <a href="/teacher/courses">My teaching courses</a>
           <% } %>
+
+          <% if (user.role === 'admin') { %>
+            <a href="/admin/users">Users</a>
+            <a href="/admin/users/create">Create user</a>
+            <a href="/admin/courses">Courses</a>
+          <% } %>
         <% } else { %>
           <a href="/login">Login</a>
           <a href="/register">Register</a>

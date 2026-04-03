@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/dashboard">← Back to dashboard</a>
+</div>
+
+<section class="card">
+  <h1>All Courses</h1>
+  <p class="muted">Overview of all courses in the system.</p>
+</section>
+
+<section class="card">
+  <% if (!courses.length) { %>
+    <p>No courses found.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Teacher</th>
+          <th>Students</th>
+          <th>Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% courses.forEach((course) => { %>
+          <tr>
+            <td><%= course.id %></td>
+            <td><%= course.title %></td>
+            <td><%= course.description || 'No description' %></td>
+            <td><%= course.teacher_name %></td>
+            <td><%= course.student_count %></td>
+            <td><%= course.created_at %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

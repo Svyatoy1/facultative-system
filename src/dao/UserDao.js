@@ -42,6 +42,17 @@ class UserDao {
 
     return rows[0];
   }
+
+  async findAll() {
+    const query = `
+      SELECT id, full_name, login, role, created_at
+      FROM users
+      ORDER BY id
+    `;
+
+    const { rows } = await pool.query(query);
+    return rows;
+  }
 }
 
 module.exports = UserDao;

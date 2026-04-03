@@ -89,6 +89,28 @@ class CourseDao {
 
     return rows[0];
   }
+
+  async findAllWithTeacherAndStudentCount() {
+    const query = `
+      SELECT
+        c.id,
+        c.title,
+        c.description,
+        t.full_name AS teacher_name,
+        COUNT(e.id)::int AS student_count,
+        c.created_at
+      FROM courses c
+      JOIN users t
+        ON t.id = c.teacher_id
+      LEFT JOIN enrollments e
+        ON e.course_id = c.id
+      GROUP BY c.id, c.title, c.description, t.full_name, c.created_at
+      ORDER BY c.id
+    `;
+
+    const { rows } = await pool.query(query);
+    return rows;
+  }
 }
 
 module.exports = CourseDao;

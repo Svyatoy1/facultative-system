@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/dashboard">← Back to dashboard</a>
+</div>
+
+<section class="card">
+  <h1>All Users</h1>
+  <p class="muted">Manage system users as an administrator.</p>
+  <p style="margin-top: 16px;">
+    <a class="button" href="/admin/users/create">Create user</a>
+  </p>
+</section>
+
+<section class="card">
+  <% if (!users.length) { %>
+    <p>No users found.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full name</th>
+          <th>Login</th>
+          <th>Role</th>
+          <th>Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach((item) => { %>
+          <tr>
+            <td><%= item.id %></td>
+            <td><%= item.full_name %></td>
+            <td><%= item.login %></td>
+            <td><%= item.role %></td>
+            <td><%= item.created_at %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>
