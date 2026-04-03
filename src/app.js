@@ -130,6 +130,22 @@ router.get('/teacher/courses', async (req, res) => {
   await courseController.showTeacherCourses(req, res);
 });
 
+router.get('/teacher/courses/create', async (req, res) => {
+  if (!(await requireRole(req, res, ['teacher']))) {
+    return;
+  }
+
+  await courseController.showCreateTeacherCourseForm(req, res);
+});
+
+router.post('/teacher/courses/create', async (req, res) => {
+  if (!(await requireRole(req, res, ['teacher']))) {
+    return;
+  }
+
+  await courseController.createCourseByTeacher(req, res);
+});
+
 router.get('/teacher/courses/:id/students', async (req, res) => {
   if (!(await requireRole(req, res, ['teacher']))) {
     return;

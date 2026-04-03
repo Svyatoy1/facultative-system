@@ -73,6 +73,22 @@ class CourseDao {
     const { rows } = await pool.query(query, [courseId, teacherId]);
     return rows[0] || null;
   }
+
+  async createCourse({ title, description, teacherId }) {
+    const query = `
+      INSERT INTO courses (title, description, teacher_id)
+      VALUES ($1, $2, $3)
+      RETURNING id, title, description, teacher_id, created_at
+    `;
+
+    const { rows } = await pool.query(query, [
+      title,
+      description,
+      teacherId
+    ]);
+
+    return rows[0];
+  }
 }
 
 module.exports = CourseDao;

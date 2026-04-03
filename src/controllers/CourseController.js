@@ -74,6 +74,51 @@ class CourseController {
       courses
     });
   }
+
+  async showCreateTeacherCourseForm(req, res) {
+    await this.viewRenderer.render(res, 'teacher/create-course', {
+      title: 'Create Course',
+      user: req.user,
+      errorMessage: '',
+      formValues: {}
+    });
+  }
+
+  async createCourseByTeacher(req, res) {
+    const result = await this.courseService.createCourseByTeacher(
+      req.user.id,
+      req.body
+    );
+
+    if (!result.ok) {
+      logger.warn('Course creation failed', {
+        teacherId: req.user.id,
+        reason: result.message
+      });
+
+      await this.viewRenderer.render(
+        res,
+        'teacher/create-course',
+        {
+          title: 'Create Course',
+          user: req.user,
+          errorMessage: result.message,
+          formValues: req.body
+        },
+        result.status
+      );
+      return;
+    }
+
+    logger.info('Course created by teacher', {
+      teacherId: req.user.id,
+      courseId: result.course.id,
+      title: result.course.title
+    });
+
+    res.writeHead(302, { Location: '/teacher/courses' });
+    res.end();
+  }
 }
 
 module.exports = CourseController;

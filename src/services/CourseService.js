@@ -61,6 +61,39 @@ class CourseService {
       enrollment
     };
   }
+
+  async createCourseByTeacher(teacherId, formData) {
+    const title = formData.title ? formData.title.trim() : '';
+    const description = formData.description ? formData.description.trim() : '';
+
+    if (!title) {
+      return {
+        ok: false,
+        status: 400,
+        message: 'Course title is required.'
+      };
+    }
+
+    if (title.length < 3) {
+      return {
+        ok: false,
+        status: 400,
+        message: 'Course title must contain at least 3 characters.'
+      };
+    }
+
+    const course = await this.courseDao.createCourse({
+      title,
+      description: description || null,
+      teacherId
+    });
+
+    return {
+      ok: true,
+      status: 201,
+      course
+    };
+  }
 }
 
 module.exports = CourseService;

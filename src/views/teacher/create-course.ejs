@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title, user }) %>
+
+<div class="top-actions">
+  <a href="/teacher/courses">← Back to my courses</a>
+</div>
+
+<section class="card card--narrow">
+  <h1>Create Course</h1>
+  <p class="muted">Create a new course as a teacher.</p>
+
+  <% if (errorMessage) { %>
+    <div class="error"><%= errorMessage %></div>
+  <% } %>
+
+  <form method="POST" action="/teacher/courses/create">
+    <div class="field">
+      <label for="title">Course title</label>
+      <input
+        id="title"
+        type="text"
+        name="title"
+        value="<%= formValues?.title || '' %>"
+      />
+    </div>
+
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        rows="6"
+      ><%= formValues?.description || '' %></textarea>
+    </div>
+
+    <button type="submit">Create course</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>
