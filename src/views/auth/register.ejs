@@ -1,0 +1,72 @@
+<%- include('../partials/header', { title, user }) %>
+
+<section class="card card--narrow">
+  <h1>Register</h1>
+  <p class="muted">Create a new account as a student or teacher.</p>
+
+  <% if (errorMessage) { %>
+    <div class="error"><%= errorMessage %></div>
+  <% } %>
+
+  <form method="POST" action="/register">
+    <div class="field">
+      <label for="full_name">Full name</label>
+      <input
+        id="full_name"
+        type="text"
+        name="full_name"
+        value="<%= formValues?.full_name || '' %>"
+      />
+    </div>
+
+    <div class="field">
+      <label for="login">Login</label>
+      <input
+        id="login"
+        type="text"
+        name="login"
+        value="<%= formValues?.login || '' %>"
+      />
+    </div>
+
+    <div class="field">
+      <label for="role">Role</label>
+      <select id="role" name="role">
+        <option value="">Select role</option>
+        <option value="student" <%= formValues?.role === 'student' ? 'selected' : '' %>>
+          student
+        </option>
+        <option value="teacher" <%= formValues?.role === 'teacher' ? 'selected' : '' %>>
+          teacher
+        </option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+      />
+    </div>
+
+    <div class="field">
+      <label for="confirm_password">Confirm password</label>
+      <input
+        id="confirm_password"
+        type="password"
+        name="confirm_password"
+      />
+    </div>
+
+    <button type="submit">Register</button>
+  </form>
+
+  <p style="margin-top: 16px;">
+    Already have an account?
+    <a href="/login">Go to login</a>
+  </p>
+</section>
+
+<%- include('../partials/footer') %>

@@ -25,6 +25,23 @@ class UserDao {
     const { rows } = await pool.query(query, [login, password]);
     return rows[0] || null;
   }
+
+  async createUser({ full_name, login, password, role }) {
+    const query = `
+      INSERT INTO users (full_name, login, password_hash, role)
+      VALUES ($1, $2, crypt($3, gen_salt('bf')), $4)
+      RETURNING id, full_name, login, role
+    `;
+
+    const { rows } = await pool.query(query, [
+      full_name,
+      login,
+      password,
+      role
+    ]);
+
+    return rows[0];
+  }
 }
 
 module.exports = UserDao;

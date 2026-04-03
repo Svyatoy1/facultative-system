@@ -4,6 +4,10 @@
   <h1>Login</h1>
   <p class="muted">Sign in to continue working with the facultative system.</p>
 
+  <% if (successMessage) { %>
+    <div class="success" style="margin-bottom: 16px;"><%= successMessage %></div>
+  <% } %>
+
   <% if (errorMessage) { %>
     <div class="error"><%= errorMessage %></div>
   <% } %>
@@ -30,6 +34,11 @@
 
     <button type="submit">Sign in</button>
   </form>
+
+  <p style="margin-top: 16px;">
+    Don’t have an account yet?
+    <a href="/register">Create one</a>
+  </p>
 </section>
 
 <%- include('../partials/footer') %>
