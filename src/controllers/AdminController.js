@@ -18,8 +18,7 @@ class AdminController {
     await this.viewRenderer.render(res, 'admin/users', {
       title: 'All Users',
       user: req.user,
-      users,
-      requiresWindowAuth: true
+      users
     });
   }
 
@@ -28,8 +27,7 @@ class AdminController {
       title: 'Create User',
       user: req.user,
       errorMessage: '',
-      formValues: {},
-      requiresWindowAuth: true
+      formValues: {}
     });
   }
 
@@ -40,8 +38,7 @@ class AdminController {
       logger.warn('Admin user creation failed', {
         adminId: req.user.id,
         login: req.body.login || null,
-        reason: result.message,
-        requiresWindowAuth: true
+        reason: result.message
       });
 
       await this.viewRenderer.render(
@@ -80,8 +77,7 @@ class AdminController {
     await this.viewRenderer.render(res, 'admin/courses', {
       title: 'All Courses',
       user: req.user,
-      courses,
-      requiresWindowAuth: true
+      courses
     });
   }
 }

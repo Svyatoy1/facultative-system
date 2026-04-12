@@ -187,45 +187,6 @@
       margin-bottom: 20px;
     }
   </style>
-  <script>
-    (() => {
-      const WINDOW_AUTH_KEY = 'window_auth';
-
-      const isAuthPage =
-        <%= typeof isAuthPage !== 'undefined' && isAuthPage ? 'true' : 'false' %>;
-
-      const initWindowAuth =
-        <%= typeof initWindowAuth !== 'undefined' && initWindowAuth ? 'true' : 'false' %>;
-
-      const serverSessionActive =
-        <%= typeof serverSessionActive !== 'undefined' && serverSessionActive ? 'true' : 'false' %>;
-
-      const params = new URLSearchParams(window.location.search);
-
-      if (params.get('logout') === '1') {
-        sessionStorage.removeItem(WINDOW_AUTH_KEY);
-      }
-
-      if (initWindowAuth) {
-        sessionStorage.setItem(WINDOW_AUTH_KEY, '1');
-        params.delete('initWindowAuth');
-
-        const nextUrl =
-          window.location.pathname +
-          (params.toString() ? `?${params.toString()}` : '');
-
-        window.history.replaceState({}, '', nextUrl);
-      }
-
-      const hasWindowAuth =
-        sessionStorage.getItem(WINDOW_AUTH_KEY) === '1';
-
-      if (isAuthPage && hasWindowAuth && serverSessionActive) {
-        window.location.replace('/dashboard');
-        return;
-      }
-    })();
-  </script>
 </head>
 <body>
   <header class="site-header">
@@ -234,24 +195,27 @@
 
       <nav class="nav">
         <% if (user) { %>
-          <a href="/dashboard">Dashboard</a>
-
           <% if (user.role === 'student') { %>
-            <a href="/courses">All courses</a>
-            <a href="/my-courses">My courses</a>
+            <a href="/student/dashboard">Dashboard</a>
+            <a href="/student/courses">All courses</a>
+            <a href="/student/my-courses">My courses</a>
           <% } %>
 
           <% if (user.role === 'teacher') { %>
+            <a href="/teacher/dashboard">Dashboard</a>
             <a href="/teacher/courses">My teaching courses</a>
           <% } %>
 
           <% if (user.role === 'admin') { %>
+            <a href="/admin/dashboard">Dashboard</a>
             <a href="/admin/users">Users</a>
             <a href="/admin/users/create">Create user</a>
             <a href="/admin/courses">Courses</a>
           <% } %>
         <% } else { %>
-          <a href="/login">Login</a>
+          <a href="/student/login">Student Login</a>
+          <a href="/teacher/login">Teacher Login</a>
+          <a href="/admin/login">Admin Login</a>
           <a href="/register">Register</a>
         <% } %>
       </nav>

@@ -1,0 +1,17 @@
+<%- include('./partials/header', { title, user }) %>
+
+<section class="card card--narrow">
+  <h1>Facultative System</h1>
+  <p class="muted">
+    Choose the area you want to enter.
+  </p>
+
+  <div style="display: grid; gap: 12px; margin-top: 20px;">
+    <a class="button" href="/student/login">Student Login</a>
+    <a class="button" href="/teacher/login">Teacher Login</a>
+    <a class="button" href="/admin/login">Admin Login</a>
+    <a class="button" href="/register">Register</a>
+  </div>
+</section>
+
+<%- include('./partials/footer') %>

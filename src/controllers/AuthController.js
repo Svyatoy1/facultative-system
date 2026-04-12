@@ -8,7 +8,37 @@ class AuthController {
     this.viewRenderer = viewRenderer;
   }
 
+  getZoneTitle(zone) {
+    if (zone === 'student') {
+      return 'Student Login';
+    }
+
+    if (zone === 'teacher') {
+      return 'Teacher Login';
+    }
+
+    if (zone === 'admin') {
+      return 'Admin Login';
+    }
+
+    return 'Login';
+  }
+
   async showLogin(req, res) {
+    const zone = req.authZone;
+
+    if (!zone) {
+      res.writeHead(302, { Location: '/student/login' });
+      res.end();
+      return;
+    }
+
+    if (req.user) {
+      res.writeHead(302, { Location: `/${zone}/dashboard` });
+      res.end();
+      return;
+    }
+
     const successMessage =
       req.query.registered === '1'
         ? 'Registration completed successfully. Now you can sign in.'
@@ -21,61 +51,87 @@ class AuthController {
 
     await this.renderLoginForm(
       res,
+      zone,
       '',
       200,
       {},
       successMessage,
-      Boolean(req.user),
       logoutMessage
     );
   }
 
   async login(req, res) {
+    const zone = req.authZone;
     const { login, password } = req.body;
+
+    if (!zone) {
+      res.writeHead(302, { Location: '/student/login' });
+      res.end();
+      return;
+    }
 
     const result = await this.authService.login(login, password);
 
     if (!result.ok) {
       logger.warn('Login failed', {
+        zone,
         login: login || null,
         reason: result.message
       });
 
       await this.renderLoginForm(
         res,
+        zone,
         result.message,
         result.status,
-        { login },
-        '',
-        Boolean(req.user),
-        ''
+        { login }
       );
       return;
     }
 
-    const { user } = result;
-    const sessionId = this.sessionManager.createSession(user);
+    if (result.user.role !== zone) {
+      const zoneMessage =
+        zone === 'student'
+          ? 'This account does not belong to the student area.'
+          : zone === 'teacher'
+          ? 'This account does not belong to the teacher area.'
+          : 'This account does not belong to the admin area.';
+
+      await this.renderLoginForm(
+        res,
+        zone,
+        zoneMessage,
+        403,
+        { login }
+      );
+      return;
+    }
+
+    const sessionId = this.sessionManager.createSession(result.user, zone);
+    const cookieConfig = this.sessionManager.getCookieConfig(zone);
+    const cookieOptions = this.sessionManager.getCookieOptions(zone);
 
     logger.info('Login successful', {
-      userId: user.id,
-      login: user.login,
-      role: user.role,
+      userId: result.user.id,
+      login: result.user.login,
+      role: result.user.role,
+      zone,
       sessionId
     });
 
-    CookieHelper.setCookie(res, 'sid', sessionId, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'Lax',
-      maxAge: 60 * 60 * 24
-    });
+    CookieHelper.setCookie(
+      res,
+      cookieConfig.cookieName,
+      sessionId,
+      cookieOptions
+    );
 
-    res.writeHead(302, { Location: '/dashboard?initWindowAuth=1' });
+    res.writeHead(302, { Location: `/${zone}/dashboard` });
     res.end();
   }
 
   async showRegister(req, res) {
-    await this.renderRegisterForm(res, '', 200, {}, Boolean(req.user));
+    await this.renderRegisterForm(res);
   }
 
   async register(req, res) {
@@ -92,8 +148,7 @@ class AuthController {
         res,
         result.message,
         result.status,
-        req.body,
-        Boolean(req.user)
+        req.body
       );
       return;
     }
@@ -104,12 +159,25 @@ class AuthController {
       role: result.user.role
     });
 
-    res.writeHead(302, { Location: '/login?registered=1' });
+    res.writeHead(302, {
+      Location: `/${result.user.role}/login?registered=1`
+    });
     res.end();
   }
 
   async logout(req, res) {
+    const zone = req.authZone;
+
+    if (!zone) {
+      res.writeHead(302, { Location: '/student/login' });
+      res.end();
+      return;
+    }
+
+    const cookieConfig = this.sessionManager.getCookieConfig(zone);
+
     logger.info('Logout', {
+      zone,
       userId: req.user?.id || null,
       login: req.user?.login || null,
       sessionId: req.sessionId || null
@@ -117,36 +185,35 @@ class AuthController {
 
     this.sessionManager.destroySession(req.sessionId);
 
-    CookieHelper.clearCookie(res, 'sid', {
-      path: '/',
+    CookieHelper.clearCookie(res, cookieConfig.cookieName, {
+      path: cookieConfig.path,
       sameSite: 'Lax'
     });
 
-    res.writeHead(302, { Location: '/login?logout=1' });
+    res.writeHead(302, { Location: `/${zone}/login?logout=1` });
     res.end();
   }
 
   async renderLoginForm(
     res,
+    zone,
     errorMessage = '',
     statusCode = 200,
     formValues = {},
     successMessage = '',
-    serverSessionActive = false,
     logoutMessage = ''
   ) {
     await this.viewRenderer.render(
       res,
       'auth/login',
       {
-        title: 'Login',
+        title: this.getZoneTitle(zone),
         user: null,
+        authZone: zone,
         errorMessage,
         successMessage,
         logoutMessage,
-        formValues,
-        isAuthPage: true,
-        serverSessionActive
+        formValues
       },
       statusCode
     );
@@ -156,8 +223,7 @@ class AuthController {
     res,
     errorMessage = '',
     statusCode = 200,
-    formValues = {},
-    serverSessionActive = false
+    formValues = {}
   ) {
     await this.viewRenderer.render(
       res,
@@ -166,9 +232,7 @@ class AuthController {
         title: 'Register',
         user: null,
         errorMessage,
-        formValues,
-        isAuthPage: true,
-        serverSessionActive
+        formValues
       },
       statusCode
     );

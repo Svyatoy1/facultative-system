@@ -1,22 +1,18 @@
-<%- include('../partials/header', { title, user, isAuthPage, serverSessionActive }) %>
+<%- include('../partials/header', { title, user }) %>
 
 <section class="card card--narrow">
-  <h1>Login</h1>
+  <h1><%= title %></h1>
   <p class="muted">Sign in to continue working with the facultative system.</p>
 
   <% if (successMessage) { %>
     <div class="success" style="margin-bottom: 16px;"><%= successMessage %></div>
   <% } %>
 
-  <% if (logoutMessage) { %>
-    <div class="success" style="margin-bottom: 16px;"><%= logoutMessage %></div>
-  <% } %>
-
   <% if (errorMessage) { %>
     <div class="error"><%= errorMessage %></div>
   <% } %>
 
-  <form method="POST" action="/login">
+  <form method="POST" action="/<%= authZone %>/login">
     <div class="field">
       <label for="login">Login</label>
       <input
@@ -42,6 +38,13 @@
   <p style="margin-top: 16px;">
     Don’t have an account yet?
     <a href="/register">Create one</a>
+  </p>
+
+  <p style="margin-top: 16px;">
+    Login areas:
+    <a href="/student/login">Student</a> |
+    <a href="/teacher/login">Teacher</a> |
+    <a href="/admin/login">Admin</a>
   </p>
 </section>
 

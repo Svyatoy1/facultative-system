@@ -4,32 +4,77 @@ const CookieHelper = require('./CookieHelper');
 class SessionManager {
   constructor() {
     this.sessions = new Map();
-    this.cookieName = 'sid';
+
+    this.zoneConfig = {
+      student: {
+        cookieName: 'student_sid',
+        path: '/student'
+      },
+      teacher: {
+        cookieName: 'teacher_sid',
+        path: '/teacher'
+      },
+      admin: {
+        cookieName: 'admin_sid',
+        path: '/admin'
+      }
+    };
+  }
+
+  resolveZone(pathname) {
+    if (pathname.startsWith('/student')) {
+      return 'student';
+    }
+
+    if (pathname.startsWith('/teacher')) {
+      return 'teacher';
+    }
+
+    if (pathname.startsWith('/admin')) {
+      return 'admin';
+    }
+
+    return null;
   }
 
   attachSession(req) {
-    const cookies = CookieHelper.parse(req.headers.cookie || '');
-    const sessionId = cookies[this.cookieName];
+    const url = new URL(req.url, 'http://localhost:3000');
+    const zone = this.resolveZone(url.pathname);
 
-    if (!sessionId) {
-      req.sessionId = null;
-      req.session = null;
-      req.user = null;
+    req.authZone = zone;
+    req.sessionId = null;
+    req.session = null;
+    req.user = null;
+
+    if (!zone) {
       return;
     }
 
-    const session = this.sessions.get(sessionId) || null;
+    const config = this.zoneConfig[zone];
+    const cookies = CookieHelper.parse(req.headers.cookie || '');
+    const sessionId = cookies[config.cookieName];
+
+    if (!sessionId) {
+      return;
+    }
+
+    const session = this.sessions.get(sessionId);
+
+    if (!session || session.zone !== zone) {
+      return;
+    }
 
     req.sessionId = sessionId;
     req.session = session;
-    req.user = session ? session.user : null;
+    req.user = session.user;
   }
 
-  createSession(user) {
+  createSession(user, zone) {
     const sessionId = randomUUID();
 
     const sessionData = {
       id: sessionId,
+      zone,
       user: {
         id: user.id,
         full_name: user.full_name,
@@ -44,16 +89,31 @@ class SessionManager {
     return sessionId;
   }
 
-  getSession(sessionId) {
-    return this.sessions.get(sessionId) || null;
-  }
-
   destroySession(sessionId) {
     if (!sessionId) {
       return;
     }
 
     this.sessions.delete(sessionId);
+  }
+
+  getCookieConfig(zone) {
+    return this.zoneConfig[zone] || null;
+  }
+
+  getCookieOptions(zone) {
+    const config = this.getCookieConfig(zone);
+
+    if (!config) {
+      return null;
+    }
+
+    return {
+      httpOnly: true,
+      path: config.path,
+      sameSite: 'Lax',
+      maxAge: 60 * 60 * 24
+    };
   }
 }
 

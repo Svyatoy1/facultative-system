@@ -6,15 +6,15 @@ const UserDao = require('./dao/UserDao');
 const CourseDao = require('./dao/CourseDao');
 const EnrollmentDao = require('./dao/EnrollmentDao');
 
-const AdminService = require('./services/AdminService');
 const AuthService = require('./services/AuthService');
 const CourseService = require('./services/CourseService');
 const TeacherService = require('./services/TeacherService');
+const AdminService = require('./services/AdminService');
 
-const AdminController = require('./controllers/AdminController');
 const AuthController = require('./controllers/AuthController');
 const CourseController = require('./controllers/CourseController');
 const TeacherController = require('./controllers/TeacherController');
+const AdminController = require('./controllers/AdminController');
 
 const router = new Router();
 const sessionManager = new SessionManager();
@@ -24,12 +24,11 @@ const userDao = new UserDao();
 const courseDao = new CourseDao();
 const enrollmentDao = new EnrollmentDao();
 
-const adminService = new AdminService(userDao, courseDao);
 const authService = new AuthService(userDao);
 const courseService = new CourseService(courseDao, enrollmentDao);
 const teacherService = new TeacherService(courseDao, enrollmentDao);
+const adminService = new AdminService(userDao, courseDao);
 
-const adminController = new AdminController(adminService, viewRenderer);
 const authController = new AuthController(
   authService,
   sessionManager,
@@ -37,37 +36,21 @@ const authController = new AuthController(
 );
 const courseController = new CourseController(courseService, viewRenderer);
 const teacherController = new TeacherController(teacherService, viewRenderer);
+const adminController = new AdminController(adminService, viewRenderer);
 
-function requireAuth(req, res) {
+function requireZoneRole(req, res, expectedRole) {
   if (!req.user) {
-    res.writeHead(302, { Location: '/login' });
+    res.writeHead(302, { Location: `/${expectedRole}/login` });
     res.end();
     return false;
   }
 
-  return true;
-}
-
-async function requireRole(req, res, allowedRoles) {
-  if (!requireAuth(req, res)) {
-    return false;
-  }
-
-  if (!allowedRoles.includes(req.user.role)) {
-    await viewRenderer.render(
-      res,
-      'error',
-      {
-        title: '403 Forbidden',
-        user: req.user,
-        heading: '403 Forbidden',
-        message: 'You do not have access to this page.',
-        backHref: '/dashboard',
-        backLabel: 'Back to dashboard'
-      },
-      403
-    );
-
+  if (req.user.role !== expectedRole) {
+    res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(`
+      <h1>403 Forbidden</h1>
+      <p>You do not have access to this area.</p>
+    `);
     return false;
   }
 
@@ -75,47 +58,78 @@ async function requireRole(req, res, allowedRoles) {
 }
 
 router.get('/', async (req, res) => {
-  res.writeHead(302, { Location: '/login' });
-  res.end();
+  await viewRenderer.render(res, 'home', {
+    title: 'Facultative System',
+    user: null
+  });
 });
 
-router.get('/login', authController.showLogin.bind(authController));
-router.post('/login', authController.login.bind(authController));
+router.get('/student/login', authController.showLogin.bind(authController));
+router.post('/student/login', authController.login.bind(authController));
+router.post('/student/logout', authController.logout.bind(authController));
+
+router.get('/teacher/login', authController.showLogin.bind(authController));
+router.post('/teacher/login', authController.login.bind(authController));
+router.post('/teacher/logout', authController.logout.bind(authController));
+
+router.get('/admin/login', authController.showLogin.bind(authController));
+router.post('/admin/login', authController.login.bind(authController));
+router.post('/admin/logout', authController.logout.bind(authController));
+
 router.get('/register', authController.showRegister.bind(authController));
 router.post('/register', authController.register.bind(authController));
-router.post('/logout', authController.logout.bind(authController));
 
-router.get('/dashboard', async (req, res) => {
-  if (!requireAuth(req, res)) {
+router.get('/student/dashboard', async (req, res) => {
+  if (!requireZoneRole(req, res, 'student')) {
     return;
   }
 
   await viewRenderer.render(res, 'dashboard', {
-    title: 'Dashboard',
-    user: req.user,
-    requiresWindowAuth: true,
-    initWindowAuth: req.query.initWindowAuth === '1'
+    title: 'Student Dashboard',
+    user: req.user
   });
 });
 
-router.get('/courses', async (req, res) => {
-  if (!(await requireRole(req, res, ['student']))) {
+router.get('/teacher/dashboard', async (req, res) => {
+  if (!requireZoneRole(req, res, 'teacher')) {
+    return;
+  }
+
+  await viewRenderer.render(res, 'dashboard', {
+    title: 'Teacher Dashboard',
+    user: req.user
+  });
+});
+
+router.get('/admin/dashboard', async (req, res) => {
+  if (!requireZoneRole(req, res, 'admin')) {
+    return;
+  }
+
+  await viewRenderer.render(res, 'dashboard', {
+    title: 'Admin Dashboard',
+    user: req.user
+  });
+});
+
+router.get('/student/courses', async (req, res) => {
+  if (!requireZoneRole(req, res, 'student')) {
     return;
   }
 
   await courseController.showAllCourses(req, res);
 });
 
-router.post('/courses/:id/enroll', async (req, res) => {
-  if (!(await requireRole(req, res, ['student']))) {
+router.post('/student/courses/:id/enroll', async (req, res) => {
+  if (!requireZoneRole(req, res, 'student')) {
     return;
   }
 
   await courseController.enroll(req, res);
 });
 
-router.get('/my-courses', async (req, res) => {
-  if (!(await requireRole(req, res, ['student']))) {
+router.get('/student/my-courses', async (req, res) => {
+  if (!requireZoneRole(req, res, 'student')) {
     return;
   }
 
@@ -123,7 +137,7 @@ router.get('/my-courses', async (req, res) => {
 });
 
 router.get('/teacher/courses', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -131,7 +145,7 @@ router.get('/teacher/courses', async (req, res) => {
 });
 
 router.get('/teacher/courses/create', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -139,7 +153,7 @@ router.get('/teacher/courses/create', async (req, res) => {
 });
 
 router.post('/teacher/courses/create', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -147,7 +161,7 @@ router.post('/teacher/courses/create', async (req, res) => {
 });
 
 router.get('/teacher/courses/:id/students', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -155,7 +169,7 @@ router.get('/teacher/courses/:id/students', async (req, res) => {
 });
 
 router.get('/teacher/enrollments/:id/edit', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -163,7 +177,7 @@ router.get('/teacher/enrollments/:id/edit', async (req, res) => {
 });
 
 router.post('/teacher/enrollments/:id/update', async (req, res) => {
-  if (!(await requireRole(req, res, ['teacher']))) {
+  if (!requireZoneRole(req, res, 'teacher')) {
     return;
   }
 
@@ -171,7 +185,7 @@ router.post('/teacher/enrollments/:id/update', async (req, res) => {
 });
 
 router.get('/admin/users', async (req, res) => {
-  if (!(await requireRole(req, res, ['admin']))) {
+  if (!requireZoneRole(req, res, 'admin')) {
     return;
   }
 
@@ -179,7 +193,7 @@ router.get('/admin/users', async (req, res) => {
 });
 
 router.get('/admin/users/create', async (req, res) => {
-  if (!(await requireRole(req, res, ['admin']))) {
+  if (!requireZoneRole(req, res, 'admin')) {
     return;
   }
 
@@ -187,7 +201,7 @@ router.get('/admin/users/create', async (req, res) => {
 });
 
 router.post('/admin/users/create', async (req, res) => {
-  if (!(await requireRole(req, res, ['admin']))) {
+  if (!requireZoneRole(req, res, 'admin')) {
     return;
   }
 
@@ -195,26 +209,11 @@ router.post('/admin/users/create', async (req, res) => {
 });
 
 router.get('/admin/courses', async (req, res) => {
-  if (!(await requireRole(req, res, ['admin']))) {
+  if (!requireZoneRole(req, res, 'admin')) {
     return;
   }
 
   await adminController.showCourses(req, res);
-});
-
-router.get('/courses/:id', async (req, res) => {
-  if (!requireAuth(req, res)) {
-    return;
-  }
-
-  await viewRenderer.render(res, 'error', {
-    title: 'Course Page',
-    user: req.user,
-    heading: 'Course page',
-    message: `Temporary route. Course id: ${req.params.id}`,
-    backHref: '/dashboard',
-    backLabel: 'Back to dashboard'
-  });
 });
 
 module.exports = {

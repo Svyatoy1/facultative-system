@@ -1,7 +1,7 @@
 <%- include('../partials/header', { title, user }) %>
 
 <div class="top-actions">
-  <a href="/dashboard">← Back to dashboard</a>
+  <a href="/student/dashboard">← Back to dashboard</a>
 </div>
 
 <section class="card">
@@ -34,7 +34,7 @@
         </div>
         <p class="success">You are already enrolled in this course.</p>
       <% } else { %>
-        <form method="POST" action="/courses/<%= course.id %>/enroll" style="margin-top: 14px;">
+        <form method="POST" action="/student/courses/<%= course.id %>/enroll" style="margin-top: 14px;">
           <button type="submit">Enroll</button>
         </form>
       <% } %>

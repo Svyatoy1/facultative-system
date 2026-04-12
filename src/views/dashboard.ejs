@@ -12,24 +12,32 @@
 
   <% if (user.role === 'student') { %>
     <ul class="list">
-      <li><a href="/courses">Browse all courses</a></li>
-      <li><a href="/my-courses">View my courses</a></li>
+      <li><a href="/student/courses">Browse all courses</a></li>
+      <li><a href="/student/my-courses">View my courses</a></li>
     </ul>
+
+    <form method="POST" action="/student/logout" style="margin-top: 20px;">
+      <button type="submit">Logout</button>
+    </form>
   <% } else if (user.role === 'teacher') { %>
     <ul class="list">
       <li><a href="/teacher/courses">Open my teaching courses</a></li>
     </ul>
+
+    <form method="POST" action="/teacher/logout" style="margin-top: 20px;">
+      <button type="submit">Logout</button>
+    </form>
   <% } else { %>
     <ul class="list">
       <li><a href="/admin/users">View all users</a></li>
       <li><a href="/admin/users/create">Create user</a></li>
       <li><a href="/admin/courses">View all courses</a></li>
     </ul>
-  <% } %>
 
-  <form method="POST" action="/logout" style="margin-top: 20px;">
-    <button type="submit">Logout</button>
-  </form>
+    <form method="POST" action="/admin/logout" style="margin-top: 20px;">
+      <button type="submit">Logout</button>
+    </form>
+  <% } %>
 </section>
 
 <%- include('./partials/footer') %>
