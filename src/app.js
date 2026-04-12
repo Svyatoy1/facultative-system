@@ -75,12 +75,6 @@ async function requireRole(req, res, allowedRoles) {
 }
 
 router.get('/', async (req, res) => {
-  if (req.user) {
-    res.writeHead(302, { Location: '/dashboard' });
-    res.end();
-    return;
-  }
-
   res.writeHead(302, { Location: '/login' });
   res.end();
 });
@@ -98,7 +92,9 @@ router.get('/dashboard', async (req, res) => {
 
   await viewRenderer.render(res, 'dashboard', {
     title: 'Dashboard',
-    user: req.user
+    user: req.user,
+    requiresWindowAuth: true,
+    initWindowAuth: req.query.initWindowAuth === '1'
   });
 });
 

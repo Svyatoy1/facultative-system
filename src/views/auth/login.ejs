@@ -1,4 +1,4 @@
-<%- include('../partials/header', { title, user }) %>
+<%- include('../partials/header', { title, user, isAuthPage, serverSessionActive }) %>
 
 <section class="card card--narrow">
   <h1>Login</h1>
@@ -6,6 +6,10 @@
 
   <% if (successMessage) { %>
     <div class="success" style="margin-bottom: 16px;"><%= successMessage %></div>
+  <% } %>
+
+  <% if (logoutMessage) { %>
+    <div class="success" style="margin-bottom: 16px;"><%= logoutMessage %></div>
   <% } %>
 
   <% if (errorMessage) { %>

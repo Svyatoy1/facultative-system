@@ -9,18 +9,25 @@ class AuthController {
   }
 
   async showLogin(req, res) {
-    if (req.user) {
-      res.writeHead(302, { Location: '/dashboard' });
-      res.end();
-      return;
-    }
-
     const successMessage =
       req.query.registered === '1'
         ? 'Registration completed successfully. Now you can sign in.'
         : '';
 
-    await this.renderLoginForm(res, '', 200, {}, successMessage);
+    const logoutMessage =
+      req.query.logout === '1'
+        ? 'You have successfully logged out.'
+        : '';
+
+    await this.renderLoginForm(
+      res,
+      '',
+      200,
+      {},
+      successMessage,
+      Boolean(req.user),
+      logoutMessage
+    );
   }
 
   async login(req, res) {
@@ -38,7 +45,10 @@ class AuthController {
         res,
         result.message,
         result.status,
-        { login }
+        { login },
+        '',
+        Boolean(req.user),
+        ''
       );
       return;
     }
@@ -60,18 +70,12 @@ class AuthController {
       maxAge: 60 * 60 * 24
     });
 
-    res.writeHead(302, { Location: '/dashboard' });
+    res.writeHead(302, { Location: '/dashboard?initWindowAuth=1' });
     res.end();
   }
 
   async showRegister(req, res) {
-    if (req.user) {
-      res.writeHead(302, { Location: '/dashboard' });
-      res.end();
-      return;
-    }
-
-    await this.renderRegisterForm(res);
+    await this.renderRegisterForm(res, '', 200, {}, Boolean(req.user));
   }
 
   async register(req, res) {
@@ -88,7 +92,8 @@ class AuthController {
         res,
         result.message,
         result.status,
-        req.body
+        req.body,
+        Boolean(req.user)
       );
       return;
     }
@@ -117,7 +122,7 @@ class AuthController {
       sameSite: 'Lax'
     });
 
-    res.writeHead(302, { Location: '/login' });
+    res.writeHead(302, { Location: '/login?logout=1' });
     res.end();
   }
 
@@ -126,7 +131,9 @@ class AuthController {
     errorMessage = '',
     statusCode = 200,
     formValues = {},
-    successMessage = ''
+    successMessage = '',
+    serverSessionActive = false,
+    logoutMessage = ''
   ) {
     await this.viewRenderer.render(
       res,
@@ -136,7 +143,10 @@ class AuthController {
         user: null,
         errorMessage,
         successMessage,
-        formValues
+        logoutMessage,
+        formValues,
+        isAuthPage: true,
+        serverSessionActive
       },
       statusCode
     );
@@ -146,7 +156,8 @@ class AuthController {
     res,
     errorMessage = '',
     statusCode = 200,
-    formValues = {}
+    formValues = {},
+    serverSessionActive = false
   ) {
     await this.viewRenderer.render(
       res,
@@ -155,7 +166,9 @@ class AuthController {
         title: 'Register',
         user: null,
         errorMessage,
-        formValues
+        formValues,
+        isAuthPage: true,
+        serverSessionActive
       },
       statusCode
     );

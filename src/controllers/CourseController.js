@@ -12,7 +12,8 @@ class CourseController {
     await this.viewRenderer.render(res, 'student/courses', {
       title: 'All Courses',
       user: req.user,
-      courses
+      courses,
+      requiresWindowAuth: true
     });
   }
 
@@ -38,7 +39,8 @@ class CourseController {
           heading: 'Enrollment error',
           message: result.message,
           backHref: '/courses',
-          backLabel: 'Back to courses'
+          backLabel: 'Back to courses',
+          requiresWindowAuth: true
         },
         result.status
       );
@@ -61,7 +63,8 @@ class CourseController {
     await this.viewRenderer.render(res, 'student/my-courses', {
       title: 'My Courses',
       user: req.user,
-      enrollments
+      enrollments,
+      requiresWindowAuth: true
     });
   }
 
@@ -80,7 +83,8 @@ class CourseController {
       title: 'Create Course',
       user: req.user,
       errorMessage: '',
-      formValues: {}
+      formValues: {},
+      requiresWindowAuth: true
     });
   }
 

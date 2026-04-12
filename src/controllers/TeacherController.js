@@ -22,7 +22,8 @@ class TeacherController {
           heading: 'Error',
           message: result.message,
           backHref: '/teacher/courses',
-          backLabel: 'Back to my courses'
+          backLabel: 'Back to my courses',
+          requiresWindowAuth: true
         },
         result.status
       );
@@ -33,7 +34,8 @@ class TeacherController {
       title: 'Course Students',
       user: req.user,
       course: result.course,
-      students: result.students
+      students: result.students,
+      requiresWindowAuth: true
     });
   }
 
@@ -53,7 +55,8 @@ class TeacherController {
           heading: 'Error',
           message: result.message,
           backHref: '/teacher/courses',
-          backLabel: 'Back to my courses'
+          backLabel: 'Back to my courses',
+          requiresWindowAuth: true
         },
         result.status
       );
@@ -64,7 +67,8 @@ class TeacherController {
       title: 'Edit Result',
       user: req.user,
       enrollment: result.enrollment,
-      errorMessage: ''
+      errorMessage: '',
+      requiresWindowAuth: true
     });
   }
 
@@ -97,7 +101,8 @@ class TeacherController {
             heading: 'Update Error',
             message: result.message,
             backHref: '/teacher/courses',
-            backLabel: 'Back to my courses'
+            backLabel: 'Back to my courses',
+            requiresWindowAuth: true
           },
           result.status
         );
@@ -111,7 +116,8 @@ class TeacherController {
           title: 'Edit Result',
           user: req.user,
           enrollment: reload.enrollment,
-          errorMessage: result.message
+          errorMessage: result.message,
+          requiresWindowAuth: true
         },
         result.status
       );
