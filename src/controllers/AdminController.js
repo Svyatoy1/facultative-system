@@ -1,4 +1,5 @@
 const logger = require('../utils/logger');
+const formatDateUa = require('../utils/formatDateUa');
 
 class AdminController {
   constructor(adminService, viewRenderer) {
@@ -9,10 +10,15 @@ class AdminController {
   async showUsers(req, res) {
     const users = await this.adminService.getAllUsers();
 
+    const formattedUsers = users.map((item) => ({
+      ...item,
+      created_at_formatted: formatDateUa(item.created_at)
+    }));
+
     await this.viewRenderer.render(res, 'admin/users', {
       title: 'All Users',
       user: req.user,
-      users
+      users: formattedUsers
     });
   }
 
@@ -63,10 +69,15 @@ class AdminController {
   async showCourses(req, res) {
     const courses = await this.adminService.getAllCourses();
 
+    const formattedCourses = courses.map((course) => ({
+      ...course,
+      created_at_formatted: formatDateUa(course.created_at)
+    }));
+
     await this.viewRenderer.render(res, 'admin/courses', {
       title: 'All Courses',
       user: req.user,
-      courses
+      courses: formattedCourses
     });
   }
 }
