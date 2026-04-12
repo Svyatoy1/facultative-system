@@ -39,9 +39,22 @@ class Router {
         role: req.user?.role || null
       });
 
-      const matchedRoute = this.routes.find((route) => {
-        return route.method === method && route.regex.test(pathname);
-      });
+      let matchedRoute = null;
+      let routeMatch = null;
+
+      for (const route of this.routes) {
+        if (route.method !== method) {
+          continue;
+        }
+
+        const match = pathname.match(route.regex);
+
+        if (match) {
+          matchedRoute = route;
+          routeMatch = match;
+          break;
+        }
+      }
 
       if (!matchedRoute) {
         logger.warn('Route not found', { method, pathname });
@@ -51,14 +64,11 @@ class Router {
         return;
       }
 
-      const match = pathname.match(matchedRoute.regex);
       const params = {};
 
-      if (match) {
-        matchedRoute.paramNames.forEach((paramName, index) => {
-          params[paramName] = match[index + 1];
-        });
-      }
+      matchedRoute.paramNames.forEach((paramName, index) => {
+        params[paramName] = routeMatch[index + 1];
+      });
 
       req.params = params;
       req.query = Object.fromEntries(url.searchParams.entries());

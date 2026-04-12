@@ -46,7 +46,12 @@ describe('AdminController', () => {
 
   test('showUsers should render all users page', async () => {
     const mockUsers = [
-      { id: 1, full_name: 'Admin User', login: 'admin', role: 'admin' }
+      {
+        id: 1,
+        full_name: 'Admin User',
+        login: 'admin',
+        role: 'admin'
+      }
     ];
 
     adminService.getAllUsers.mockResolvedValue(mockUsers);
@@ -58,7 +63,16 @@ describe('AdminController', () => {
       'admin/users',
       expect.objectContaining({
         title: 'All Users',
-        users: mockUsers
+        user: req.user,
+        users: expect.arrayContaining([
+          expect.objectContaining({
+            id: 1,
+            full_name: 'Admin User',
+            login: 'admin',
+            role: 'admin',
+            created_at_formatted: expect.any(String)
+          })
+        ])
       })
     );
   });
@@ -152,7 +166,16 @@ describe('AdminController', () => {
       'admin/courses',
       expect.objectContaining({
         title: 'All Courses',
-        courses: mockCourses
+        user: req.user,
+        courses: expect.arrayContaining([
+          expect.objectContaining({
+            id: 1,
+            title: 'Web Development Basics',
+            teacher_name: 'Іван Петренко',
+            student_count: 3,
+            created_at_formatted: expect.any(String)
+          })
+        ])
       })
     );
   });
